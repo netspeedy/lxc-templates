@@ -38,7 +38,7 @@ jobs:
       - name: Create archive
         run: |
           echo "VERSION=$(cat /etc/debian_version)" >> $GITHUB_ENV
-          sudo tar -cvzf debian-12-standard_${VERSION}-1_amd64.tar.zst -C build/bookworm .
+          sudo tar -cvzf debian-12-standard_${{ env.VERSION }}-1_amd64.tar.zst -C build/bookworm .
 
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
