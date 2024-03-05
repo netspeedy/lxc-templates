@@ -48,4 +48,4 @@ jobs:
           asset_name: debian-12-standard_${{ env.DEBIAN_VERSION }}-1_amd64.tar.zst
           tag: ${{ github.ref }}
           overwrite: true
-          body: "This is my release text"
+          body: "Debian (${{ env.DEBIAN_VERSION }}) LXC Container :rocket:"
