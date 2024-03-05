@@ -17,7 +17,7 @@ jobs:
 
       - name: Download and install Debian base system
         run: |
-          debootstrap bookworm build/bookworm
+          sudo debootstrap bookworm build/bookworm
 
       - name: Enter chroot environment
         run: |
