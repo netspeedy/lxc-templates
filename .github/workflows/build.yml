@@ -1,22 +1,16 @@
-name: Build Debian Images (arm64 & amd64)
+name: Build Debian Image (amd64)
 
 on: [push]
 
 jobs:
   build:
-    runs-on: ${{ matrix.runner }}
-    strategy:
-      matrix:
-        runner: [ubuntu-latest-arm64, ubuntu-latest]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install debootstrap (if amd64)
-        run: |
-          if [[ ${{ runner }} == *"amd64"* ]]; then
-            sudo apt-get update && sudo apt-get install -y debootstrap
-          fi
+      - name: Install debootstrap
+        run: sudo apt-get update && sudo apt-get install -y debootstrap
 
       - name: Create build directory
         run: mkdir -p build/bookworm
@@ -43,11 +37,10 @@ jobs:
 
       - name: Create archive
         run: |
-          ARCHIVE_NAME=debian-12-standard_12.2-1_${{ runner }}.tar.zst
-          tar -cvzf $ARCHIVE_NAME -C build/bookworm .
+          tar -cvzf debian-12-standard_12.2-1_amd64.tar.zst -C build/bookworm .
 
       - name: Upload archive as artifact
         uses: actions/upload-artifact@v3
         with:
-          name: ${{ runner }}
-          path: build/bookworm/$ARCHIVE_NAME
+          name: debian-12-standard_12.2-1_amd64.tar.zst
+          path: build/bookworm/debian-12-standard_12.2-1_amd64.tar.zst
