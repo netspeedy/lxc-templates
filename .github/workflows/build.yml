@@ -1,0 +1,53 @@
+name: Build Debian Images (arm64 & amd64)
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [ubuntu-latest-arm64, ubuntu-latest]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install debootstrap (if amd64)
+        run: |
+          if [[ ${{ runner }} == *"amd64"* ]]; then
+            sudo apt-get update && sudo apt-get install -y debootstrap
+          fi
+
+      - name: Create build directory
+        run: mkdir -p build/bookworm
+
+      - name: Download and install Debian base system
+        run: |
+          debootstrap bookworm build/bookworm
+
+      - name: Enter chroot environment
+        run: |
+          chroot build/bookworm/ /bin/bash -c "
+            apt-get update
+            apt-get install -y locales locales-all python3 openssh-server ifupdown2
+            apt-get -y autoremove --purge ifupdown
+            apt-get clean
+            rm -rf /etc/ssh/ssh_host*
+            rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+            find /var/log -type f -exec truncate -s 0 {} \;
+            truncate -s 0 /etc/hostname
+            truncate -s 0 /etc/machine-id
+            truncate -s 0 /var/lib/dbus/machine-id
+            exit
+          "
+
+      - name: Create archive
+        run: |
+          ARCHIVE_NAME=debian-12-standard_12.2-1_${{ runner }}.tar.zst
+          tar -cvzf $ARCHIVE_NAME -C build/bookworm .
+
+      - name: Upload archive as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ runner }}
+          path: build/bookworm/$ARCHIVE_NAME
