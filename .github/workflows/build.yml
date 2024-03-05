@@ -9,18 +9,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Install fakeroot
-        run: sudo apt-get update && sudo apt-get install -y fakeroot debootstrap
+      - name: Install debootstrap
+        run: sudo apt-get update && sudo apt-get install -y debootstrap
 
       - name: Create build directory
         run: mkdir -p build/bookworm
 
       - name: Download and install Debian base system
-        run: fakeroot debootstrap bookworm build/bookworm
-
-      - name: Install required packages
         run: |
-          fakeroot chroot build/bookworm /bin/bash -c "
+          debootstrap bookworm build/bookworm
+
+      - name: Enter chroot environment
+        run: |
+          cd build/bookworm/
+          sudo mount --types proc /proc proc/
+          chroot build/bookworm/ /bin/bash -c "
             apt-get update
             apt-get install -y locales locales-all python3 openssh-server ifupdown2
             apt-get -y autoremove --purge ifupdown
@@ -43,3 +46,4 @@ jobs:
         with:
           name: debian-12-standard_12.2-1_amd64.tar.zst
           path: build/bookworm/debian-12-standard_12.2-1_amd64.tar.zst
+
