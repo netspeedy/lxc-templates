@@ -23,6 +23,7 @@ jobs:
         run: |
           cd build/bookworm/
           sudo mount --types proc /proc proc/
+          cd ../..
           chroot build/bookworm/ /bin/bash -c "
             apt-get update
             apt-get install -y locales locales-all python3 openssh-server ifupdown2
