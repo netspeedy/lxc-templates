@@ -1,0 +1,46 @@
+name: Build Debian Image (amd64)
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Install debootstrap
+        run: sudo apt-get update && sudo apt-get install -y debootstrap
+
+      - name: Create build directory
+        run: mkdir -p build/bookworm
+
+      - name: Download and install Debian base system
+        run: |
+          sudo debootstrap bookworm build/bookworm
+
+      - name: Enter chroot environment
+        run: |
+          sudo chroot build/bookworm/ /bin/bash -c "
+            apt-get update
+            apt-get install -y locales locales-all python3 openssh-server ifupdown2
+            apt-get -y autoremove --purge ifupdown
+            apt-get clean
+            rm -rf /etc/ssh/ssh_host*
+            rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+            find /var/log -type f -exec truncate -s 0 {} \;
+            truncate -s 0 /etc/hostname
+            truncate -s 0 /etc/machine-id
+            truncate -s 0 /var/lib/dbus/machine-id
+            exit
+          "
+
+      - name: Create archive
+        run: |
+          sudo tar -cvzf debian-12-standard_12.2-1_amd64.tar.zst -C build/bookworm .
+
+      - name: Upload archive as artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: debian-12-standard_12.2-1_amd64.tar.zst
+          path: debian-12-standard_12.2-1_amd64.tar.zst
