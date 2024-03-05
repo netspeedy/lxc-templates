@@ -39,8 +39,12 @@ jobs:
         run: |
           sudo tar -cvzf debian-12-standard_12.2-1_amd64.tar.zst -C build/bookworm .
 
-      - name: Upload archive as artifact
-        uses: actions/upload-artifact@v3
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
         with:
-          name: debian-12-standard_12.2-1_amd64.tar.zst
-          path: debian-12-standard_12.2-1_amd64.tar.zst
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: debian-12-standard_12.2-1_amd64.tar.zst
+          asset_name: debian-12-standard_12.2-1_amd64.tar.zst
+          tag: ${{ github.ref }}
+          overwrite: true
+          body: "This is my release text"
