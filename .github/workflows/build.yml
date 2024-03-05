@@ -21,7 +21,7 @@ jobs:
 
       - name: Enter chroot environment
         run: |
-          chroot build/bookworm/ /bin/bash -c "
+          sudo chroot build/bookworm/ /bin/bash -c "
             apt-get update
             apt-get install -y locales locales-all python3 openssh-server ifupdown2
             apt-get -y autoremove --purge ifupdown
