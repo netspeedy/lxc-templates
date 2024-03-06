@@ -46,6 +46,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: debian-12-standard_${{ env.DEBIAN_VERSION }}-1_amd64.tar.zst
           asset_name: debian-12-standard_${{ env.DEBIAN_VERSION }}-1_amd64.tar.zst
-          tag: ${{ github.ref }}
+          tag: "Debian Bookworm (${{ env.DEBIAN_VERSION }})"
           overwrite: true
-          body: "Debian (${{ env.DEBIAN_VERSION }}) LXC Container :rocket:"
+          body: "This minimal LXC template, designed for use with Ansible playbooks, includes Python support and adheres to the standard requirements for Ansible."
