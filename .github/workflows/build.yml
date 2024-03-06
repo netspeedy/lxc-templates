@@ -1,6 +1,10 @@
 name: Build Debian Image (amd64)
 
-on: [push]
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
 
 jobs:
   build:
@@ -9,8 +13,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Install debootstrap
-        run: sudo apt-get update && sudo apt-get install -y debootstrap
+      - name: Install packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y debootstrap
 
       - name: Create build directory
         run: mkdir -p build/bookworm
@@ -19,7 +25,7 @@ jobs:
         run: |
           sudo debootstrap bookworm build/bookworm
 
-      - name: Enter chroot environment
+      - name: Create LXC template
         run: |
           sudo chroot build/bookworm/ /bin/bash -c "
             apt-get update
@@ -34,9 +40,6 @@ jobs:
             truncate -s 0 /var/lib/dbus/machine-id
             exit
           "
-
-      - name: Create archive
-        run: |
           sudo tar -cvzf debian-12-standard_$(cat build/bookworm/etc/debian_version)-1_amd64.tar.zst -C build/bookworm .
           echo "DEBIAN_VERSION=$(cat build/bookworm/etc/debian_version)" >> $GITHUB_ENV
 
@@ -46,6 +49,6 @@ jobs:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: debian-12-standard_${{ env.DEBIAN_VERSION }}-1_amd64.tar.zst
           asset_name: debian-12-standard_${{ env.DEBIAN_VERSION }}-1_amd64.tar.zst
-          tag: "Debian Bookworm (${{ env.DEBIAN_VERSION }})"
+          tag: ${{ github.ref }}
           overwrite: true
-          body: "This minimal LXC template, designed for use with Ansible playbooks, includes Python support and adheres to the standard requirements for Ansible."
+          body: "This minimal LXC template, designed for use with Ansible playbooks, includes Python support and adheres to the standard requirements for Ansible. It is updated weekly, ensuring you have access to the latest features and bug fixes."
